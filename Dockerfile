@@ -14,7 +14,12 @@ RUN mkdir -p /edgelauncher/data/mainnet
 #ADD ./edgelauncher/edgeencoder/config.yaml /edgelauncher/data/mainnet/edgeencoder/config.yaml
 ADD ./edgelauncher/staking-summary /bin/staking-summary
 RUN chmod a+x /bin/staking-summary
-RUN echo 'echo "Theta EdgeNode started in the background.\nRun staking-summary command to display the Staking Summary for this EdgeNode.\n"' > /root/.bashrc
+
+RUN echo 'echo ""' > /root/.bashrc && \
+    echo 'echo "Theta EdgeNode started in the background."' >> /root/.bashrc && \
+    echo 'echo "Run staking-summary command to display the Staking Summary for this EdgeNode."' >> /root/.bashrc && \
+    echo 'echo ""' > /root/.bashrc  && \
+    echo "export PS1='\h:\w\$ '" >> /root/.bashrc
 
 ENV EDGELAUNCHER_CONFIG_PATH=/edgelauncher/data/mainnet
 ENV PASSWORD=LivinOnTheEdge
