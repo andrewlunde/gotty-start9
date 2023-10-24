@@ -8,7 +8,7 @@ LABEL maintainer="andrewlunde <andrew.lunde@sap.com>"
 #WORKDIR /src
 #COPY . .
 
-EXPOSE 8080
+EXPOSE 80
 
 RUN apt-get -y update && \
     apt-get install -y htop lsof && \
