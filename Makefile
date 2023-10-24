@@ -1,7 +1,6 @@
 PKG_ID := $(shell yq e ".id" manifest.yaml)
 PKG_VERSION := $(shell yq e ".version" manifest.yaml)
 TS_FILES := $(shell find ./ -name \*.ts)
-THETA_EDGENODE_SRC := $(shell find ./gotty/src) gotty/Cargo.toml gotty/Cargo.lock
 
 # delete the target of a rule if it has changed and its recipe exits with a nonzero exit status
 .DELETE_ON_ERROR:
@@ -21,7 +20,6 @@ else
 endif
 
 clean:
-	rm -rf docker-images
 	rm -f $(PKG_ID).s9pk
 	rm -f scripts/*.js
 
@@ -44,43 +42,12 @@ scripts/embassy.js: $(TS_FILES)
 	deno bundle scripts/embassy.ts scripts/embassy.js
 
 arm:
-	@rm -f docker-images/x86_64.tar
 	ARCH=aarch64 $(MAKE)
 
 x86:
-	@rm -f docker-images/aarch64.tar
 	ARCH=x86_64 $(MAKE)
 
-docker-images/aarch64.tar: Dockerfile docker_entrypoint.sh gotty/target/aarch64-unknown-linux-musl/release/gotty
-ifeq ($(ARCH),x86_64)
-else
-	mkdir -p docker-images
-	docker buildx build --tag start9/$(PKG_ID)/main:$(PKG_VERSION) --build-arg ARCH=aarch64 --platform=linux/arm64 -o type=docker,dest=docker-images/aarch64.tar .
-endif
-
-run/arm: Dockerfile docker_entrypoint.sh gotty/target/aarch64-unknown-linux-musl/release/gotty
-ifeq ($(ARCH),x86_64)
-else
-	docker buildx build --tag start9/$(PKG_ID)/main:$(PKG_VERSION) --build-arg ARCH=aarch64 --platform=linux/arm64 -o type=docker .
-	docker run -p 8080:8080 start9/$(PKG_ID)/main:$(PKG_VERSION)
-endif
-
-docker-images/x86_64.tar: Dockerfile docker_entrypoint.sh gotty/target/x86_64-unknown-linux-musl/release/gotty
-ifeq ($(ARCH),aarch64)
-else
-	mkdir -p docker-images
-	docker buildx build --tag start9/$(PKG_ID)/main:$(PKG_VERSION) --build-arg ARCH=x86_64 --platform=linux/amd64 -o type=docker,dest=docker-images/x86_64.tar .
-endif
-
-run/x86: Dockerfile docker_entrypoint.sh gotty/target/x86_64-unknown-linux-musl/release/gotty
-ifeq ($(ARCH),aarch64)
-else
-	docker buildx build --tag start9/$(PKG_ID)/main:$(PKG_VERSION) --build-arg ARCH=x86_64 --platform=linux/amd64 -o type=docker .
-	docker run -p 8080:8080 start9/$(PKG_ID)/main:$(PKG_VERSION)
-endif
-
-
-$(PKG_ID).s9pk: manifest.yaml instructions.md icon.png LICENSE scripts/embassy.js docker-images/aarch64.tar docker-images/x86_64.tar
+$(PKG_ID).s9pk: manifest.yaml instructions.md icon.png LICENSE scripts/embassy.js
 ifeq ($(ARCH),aarch64)
 	@echo "start-sdk: Preparing aarch64 package ..."
 else ifeq ($(ARCH),x86_64)
@@ -89,9 +56,3 @@ else
 	@echo "start-sdk: Preparing Universal Package ..."
 endif
 	@start-sdk pack
-
-gotty/target/aarch64-unknown-linux-musl/release/gotty: $(THETA_EDGENODE_SRC)
-	docker run --rm -it -v ~/.cargo/registry:/root/.cargo/registry -v "$(shell pwd)"/gotty:/home/rust/src messense/rust-musl-cross:aarch64-musl cargo build --release
-
-gotty/target/x86_64-unknown-linux-musl/release/gotty: $(THETA_EDGENODE_SRC)
-	docker run --rm -it -v ~/.cargo/registry:/root/.cargo/registry -v "$(shell pwd)"/gotty:/home/rust/src messense/rust-musl-cross:x86_64-musl cargo build --release
