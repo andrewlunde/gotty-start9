@@ -12,9 +12,9 @@ RUN mkdir -p /edgelauncher/data/mainnet
 #ADD ./edgelauncher/config.yaml /edgelauncher/data/mainnet/config.yaml
 #ADD ./edgelauncher/edgecore/config.yaml /edgelauncher/data/mainnet/edgecore/config.yaml
 #ADD ./edgelauncher/edgeencoder/config.yaml /edgelauncher/data/mainnet/edgeencoder/config.yaml
-ADD ./edgelauncher/staking-summary.sh /bin/staking-summary.sh
-RUN chmod a+x /bin/staking-summary.sh
-RUN echo "Theta EdgeNode started in the background.\nRun staking-summary.sh command to display the Staking Summary for this EdgeNode.\n" > /root/.bashrc
+ADD ./edgelauncher/staking-summary /bin/staking-summary
+RUN chmod a+x /bin/staking-summary
+RUN echo 'echo "Theta EdgeNode started in the background.\nRun staking-summary command to display the Staking Summary for this EdgeNode.\n"' > /root/.bashrc
 
 ENV EDGELAUNCHER_CONFIG_PATH=/edgelauncher/data/mainnet
 ENV PASSWORD=LivinOnTheEdge
@@ -29,7 +29,7 @@ EXPOSE 17935
 
 RUN apt-get -y update && \
     apt-get install -y htop lsof && \
-    apt-get install -y curl jq && \
+    apt-get install -y curl jq vim && \
     VERSION=v1.0.1 && \
     curl -sLk https://github.com/yudai/gotty/releases/download/$VERSION/gotty_linux_amd64.tar.gz \
     | tar xzC /usr/local/bin && \
