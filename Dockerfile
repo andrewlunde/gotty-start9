@@ -4,18 +4,24 @@ LABEL maintainer="andrewlunde <andrew.lunde@sap.com>"
 FROM thetalabsorg/edgelauncher_mainnet:v1.1.0
 ##CMD ["/bin/sh" "-c" "/bin/start.sh"]
 
-RUN mkdir -p /edgelauncher/data/mainnet/anycast
-RUN mkdir -p /edgelauncher/data/mainnet/edgecore
-RUN mkdir -p /edgelauncher/data/mainnet/edgeencoder
+RUN mkdir -p /edgelauncher/data/mainnet
+#RUN mkdir -p /edgelauncher/data/mainnet/anycast
+#RUN mkdir -p /edgelauncher/data/mainnet/edgecore
+#RUN mkdir -p /edgelauncher/data/mainnet/edgeencoder
 
-ADD ./edgelauncher/config.yaml /edgelauncher/data/mainnet/config.yaml
-ADD ./edgelauncher/edgecore/config.yaml /edgelauncher/data/mainnet/edgecore/config.yaml
-ADD ./edgelauncher/edgeencoder/config.yaml /edgelauncher/data/mainnet/edgeencoder/config.yaml
+#ADD ./edgelauncher/config.yaml /edgelauncher/data/mainnet/config.yaml
+#ADD ./edgelauncher/edgecore/config.yaml /edgelauncher/data/mainnet/edgecore/config.yaml
+#ADD ./edgelauncher/edgeencoder/config.yaml /edgelauncher/data/mainnet/edgeencoder/config.yaml
+ENV EDGELAUNCHER_CONFIG_PATH=/edgelauncher/data/mainnet
+ENV PASSWORD=LivinOnTheEdge
 #RUN apt-get update && apt-get install -y curl
 #WORKDIR /src
 #COPY . .
 
 EXPOSE 80
+EXPOSE 15888
+EXPOSE 17888
+EXPOSE 17935
 
 RUN apt-get -y update && \
     apt-get install -y htop lsof && \
